@@ -22,16 +22,20 @@ date_entry.pack(side = LEFT)
 date = manifests[0].date
 date_entry.insert(0, date)
 
-
 def retrieve_manifests():
+    try:
+        datetime.strptime(date_entry.get(), "%m-%d-%Y")
+    except:
+        messagebox.showinfo("Information","Date is invalid.")
+        return
+        
     global manifests
     manifests = load_manifests(date_entry.get())
-    print(manifests)
+    main_frame.destroy()
 
-btn=Button(header,text="Load Manifests", padx = 20, command=retrieve_manifests)
-btn.pack(side = LEFT)
+    initialize(root, manifests)
 
-def populate_manifest(win):
+def populate_manifest(win, manifests):
     #lists of each entry widget
     global leads
     leads = []
@@ -161,44 +165,35 @@ def update_manifests():
             index += 1
         
         create_workbook(manifests[x])
-    save_manifests()
+    save_manifests(manifests)
     messagebox.showinfo("Information", "Manifests saved and spreadsheets have been created.")
 
 
 def print_manifests_button():
     print_manifests()
 
-# Create a main frame
-main_frame = Frame(root)
-main_frame.pack(fill = BOTH, expand = 1)
+def initialize(root, manifests):
+    global main_frame
+    main_frame = Frame(root)
+    main_frame.pack(fill = BOTH, expand = 1)
+    my_canvas = Canvas(main_frame)
+    my_canvas.pack(side = LEFT, fill = BOTH, expand = 1)
+    my_scrollbar = ttk.Scrollbar(main_frame, orient = VERTICAL, command = my_canvas.yview)
+    my_scrollbar.pack(side = RIGHT, fill = Y)
+    my_canvas.configure(yscrollcommand = my_scrollbar.set)
+    my_canvas.bind('<Configure>', lambda e: my_canvas.configure(scrollregion = my_canvas.bbox("all")))
+    second_frame = Frame(my_canvas, padx = 20)
+    my_canvas.create_window((0,0), window = second_frame, anchor = "nw")
 
-# Create a canvas
-my_canvas = Canvas(main_frame)
-my_canvas.pack(side = LEFT, fill = BOTH, expand = 1)
+    populate_manifest(second_frame, manifests)
 
-# Add a scrollbar to the canvas
-my_scrollbar = ttk.Scrollbar(main_frame, orient = VERTICAL, command = my_canvas.yview)
-my_scrollbar.pack(side = RIGHT, fill = Y)
+initialize(root, manifests)
 
-# Configure the canvas
-my_canvas.configure(yscrollcommand = my_scrollbar.set)
-my_canvas.bind('<Configure>', lambda e: my_canvas.configure(scrollregion = my_canvas.bbox("all")))
-
-# Create ANOTHER frame INSIDE the canvas
-second_frame = Frame(my_canvas, padx = 20)
-
-# Add that new frame to a window in the canvas
-my_canvas.create_window((0,0), window = second_frame, anchor = "nw")
-
-
-populate_manifest(second_frame)
-
-footer = Frame(root, pady = 10, padx = 20)
-footer.pack(fill = BOTH)
-
-btn=Button(footer,text="Update Manifests", padx = 20, command=update_manifests)
+btn=Button(header,text="Load Manifests", padx = 20, command=retrieve_manifests)
 btn.pack(side = LEFT)
-btn2=Button(footer,text="Print manifests", padx = 20, command=print_manifests_button)
+btn=Button(header,text="Update Manifests", padx = 20, command=update_manifests)
+btn.pack(side = LEFT)
+btn2=Button(header,text="Print manifests", padx = 20, command=print_manifests_button)
 btn2.pack(side = LEFT)
 
 root.mainloop() #running the loop that works as a trigger

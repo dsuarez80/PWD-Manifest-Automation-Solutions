@@ -46,8 +46,7 @@ def load_manifests(givendate):
     latest = max(dates, key = lambda d: datetime.strptime(d, '%m-%d-%Y'))
 
     if bool(givendate):
-        latest = datetime.strptime(givendate, '%m-%d-%Y')
-        print(latest)
+        latest = givendate
         if not os.path.exists("Manifest Creator/manifests/manifests " + latest + ".json"):
             return False
 
@@ -66,7 +65,7 @@ def load_manifests(givendate):
             manifests.append(manifest)
     return manifests
 
-def save_manifests():
+def save_manifests(manifests):
     new_manifests = {}
     manifest_date = manifests[0].date
     new_manifests["date"] = manifest_date
