@@ -57,6 +57,7 @@ def populate_manifest(win, manifests):
     global erasebtns
     erasebtns = []
     #^these are widgets, not the values stored in manifests object list, though they do contain the values of the data in the entry widget
+    #test comment
 
     orders = []
 
