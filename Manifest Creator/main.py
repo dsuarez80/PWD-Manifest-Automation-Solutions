@@ -8,8 +8,8 @@ from ManifestGenerator import create_workbook
 
 root = tk.Tk() #creating the main window and storing the window object in 'win'
 root.title('Install Manifests') #setting title of the window
-root.geometry("1400x900")
-root.resizable(False, False)
+root.geometry("1400x900") #setting the size of the window
+root.resizable(False, False) #making neither the x or y resizable for the window
 
 header = Frame(root, pady = 10, padx = 20)
 header.pack(fill = BOTH)
@@ -74,11 +74,29 @@ def populate_manifest(win, manifests):
         Label(frame, text = 'Lead').grid(row = i, column = 1) 
         Label(frame, text = 'Crew').grid(row = i, column = 2) 
         i += 1
+
+        def erase_manifest(x = manifestno):
+            for i in range((x-1)*6, (x)*6):
+                builders[i].delete(0, END)
+                subdivisions[i].delete(0, END)
+                lots[i].delete(0, END)
+                windowsL[i].delete(0, END)
+                doorsL[i].delete(0, END)
+                notesL[i].delete(0, END)
+            
+                builders[i].insert(0, "")
+                subdivisions[i].insert(0, "")
+                lots[i].insert(0, "")
+                windowsL[i].insert(0, "")
+                doorsL[i].insert(0, "")
+                notesL[i].insert(0, "")
+        
+        erasebtn = Button(frame, text = "Erase Entries", command = erase_manifest)
+        erasebtn.grid(row = i, column = 0)
+        erasebtns.append(erasebtn)
+
         manifestno += 1
 
-        #erasebtn = Button(frame, text = "Erase Entries", command=erase_manifest)
-        #erasebtn.grid(row = i, column = 0)
-        #erasebtns.append(erasebtn)
 
         lead = Entry(frame)
         lead.grid(row = i, column = 1, ipadx = 60)
@@ -104,40 +122,32 @@ def populate_manifest(win, manifests):
 
             Label(frame, text = "Work Order: " + str(orderno)).grid(row = i, column = 0)
 
-            #"b"uilder "e"ntry name b-e-name etc lead + "b"uilder + ordernumber 
-            # adrianb1, adrianb2 for example for the first and second workorder builder entries belonging to adrian
-            bename = m.lead.lower() + "b" + str(orderno)
-            builder = Entry(frame, name = bename)
+            builder = Entry(frame)
             builder.grid(row = i, column = 1, ipadx = 60)
             builder.insert(0, workorder.builder)
             builders.append(builder)
 
-            sename = m.lead.lower() + "s" + str(orderno)
-            subdivision = Entry(frame, name = sename)
+            subdivision = Entry(frame)
             subdivision.grid(row = i, column = 2, ipadx = 60)
             subdivision.insert(0, workorder.subdivision)
             subdivisions.append(subdivision)
             
-            lename = m.lead.lower() + "l" + str(orderno)
-            lot = Entry(frame, name = lename)
+            lot = Entry(frame)
             lot.grid(row = i, column = 3)
             lot.insert(0, workorder.lot)
             lots.append(lot)
 
-            wename = m.lead.lower() + "w" + str(orderno)
-            windows = Entry(frame, name = wename)
+            windows = Entry(frame)
             windows.grid(row = i, column = 4, ipadx = 30)
             windows.insert(0, workorder.windows)
             windowsL.append(windows)
-
-            dename = m.lead.lower() + "d" + str(orderno)        
-            doors = Entry(frame, name = dename)
+      
+            doors = Entry(frame)
             doors.grid(row = i, column = 5, ipadx = 30)
             doors.insert(0, workorder.doors)
             doorsL.append(doors)
 
-            nename = m.lead.lower() + "n" + str(orderno)
-            notes = Entry(frame, name = nename)
+            notes = Entry(frame)
             notes.grid(row = i, column = 6, ipadx = 60)
             notes.insert(0, workorder.notes)
             notesL.append(notes)
@@ -177,10 +187,7 @@ def update_manifests():
         create_workbook(manifests[x])
     save_manifests(manifests)
     messagebox.showinfo("Information", "Manifests saved and spreadsheets have been created.")
-
-
-def erase_manifest():
-    return
+    
 
 def print_manifests_button():
     return
