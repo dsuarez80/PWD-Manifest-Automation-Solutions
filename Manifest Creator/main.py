@@ -64,6 +64,9 @@ def populate_manifest(win, manifests):
     orderno = 0
     i = 2
 
+    if not bool(manifests):
+        return
+
     for m in manifests:
         frame = LabelFrame(win, text = 'Manifest No. ' + str(manifestno), padx = 20, pady = 20)
         frame.pack(fill = BOTH, expand = YES)
