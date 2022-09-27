@@ -1,7 +1,6 @@
-from re import template
 from openpyxl import load_workbook
-import os, datetime
-from datetime import datetime
+import os
+from datetime import datetime, date, timedelta
 
 weekdays = {0 : "MONDAY", 1 : "TUESDAY", 2 : "WEDNESDAY", 3 : "THURSDAY", 4 : "FRIDAY", 5 : "SATURDAY", 6 : "SUNDAY"}
 manifests_filepath = "//dc01/_SHARE/Company/Forms/Daily Job sheets/DAILY JOB SHEETS - SEPTEMBER 2022/Install Manifests/"
@@ -33,14 +32,14 @@ def execute():
             print("No files have been created.")
             exit()
     
-    current_day = datetime.date.today()
-    future_date = current_day + datetime.timedelta(days = daysn)
+    current_day = date.today()
+    future_date = current_day + timedelta(days = daysn)
 
     weekdayN = future_date.weekday()
     global weekday
     weekday = weekdays[weekdayN]
 
-    formatted_date = datetime.date.strftime(future_date, "%m-%d-%Y")
+    formatted_date = date.strftime(future_date, "%m-%d-%Y")
     global active_date
     active_date = formatted_date
 

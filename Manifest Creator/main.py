@@ -28,7 +28,7 @@ def retrieve_manifests():
     except:
         messagebox.showinfo("Information","Date is invalid.")
         return
-        
+
     global manifests
     manifests = load_manifests(date_entry.get())
     main_frame.destroy()
@@ -53,6 +53,9 @@ def populate_manifest(win, manifests):
     doorsL = []
     global notesL
     notesL = []
+
+    global erasebtns
+    erasebtns = []
     #^these are widgets, not the values stored in manifests object list, though they do contain the values of the data in the entry widget
 
     orders = []
@@ -64,11 +67,15 @@ def populate_manifest(win, manifests):
     for m in manifests:
         frame = LabelFrame(win, text = 'Manifest No. ' + str(manifestno), padx = 20, pady = 20)
         frame.pack(fill = BOTH, expand = YES)
-
+        
         Label(frame, text = 'Lead').grid(row = i, column = 1) 
         Label(frame, text = 'Crew').grid(row = i, column = 2) 
         i += 1
         manifestno += 1
+
+        #erasebtn = Button(frame, text = "Erase Entries", command=erase_manifest)
+        #erasebtn.grid(row = i, column = 0)
+        #erasebtns.append(erasebtn)
 
         lead = Entry(frame)
         lead.grid(row = i, column = 1, ipadx = 60)
@@ -169,8 +176,11 @@ def update_manifests():
     messagebox.showinfo("Information", "Manifests saved and spreadsheets have been created.")
 
 
+def erase_manifest():
+    return
+
 def print_manifests_button():
-    print_manifests()
+    return
 
 def initialize(root, manifests):
     global main_frame
@@ -191,9 +201,10 @@ initialize(root, manifests)
 
 btn=Button(header,text="Load Manifests", padx = 20, command=retrieve_manifests)
 btn.pack(side = LEFT)
-btn=Button(header,text="Update Manifests", padx = 20, command=update_manifests)
-btn.pack(side = LEFT)
+
 btn2=Button(header,text="Print manifests", padx = 20, command=print_manifests_button)
-btn2.pack(side = LEFT)
+btn2.pack(side = RIGHT)
+btn3=Button(header,text="Update Manifests", padx = 20, command=update_manifests)
+btn3.pack(side = RIGHT)
 
 root.mainloop() #running the loop that works as a trigger
