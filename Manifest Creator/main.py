@@ -195,7 +195,9 @@ def update_manifests(new = False, m = manifests):
             m[x].workorders[y].notes = notesL[index].get()
             index += 1
         
-        create_workbook(m[x])
+        if m[x].lead:
+            create_workbook(m[x])
+    m = list(filter((lambda x: x.lead != ""), m))
     save_manifests(m)
     messagebox.showinfo("Information", "Manifests saved and spreadsheets have been created.")
     return m
