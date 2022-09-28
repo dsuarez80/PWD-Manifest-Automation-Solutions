@@ -14,7 +14,8 @@ root.resizable(False, False) #making neither the x or y resizable for the window
 header = Frame(root, pady = 10, padx = 20)
 header.pack(fill = BOTH)
 
-manifests = load_manifests(False)
+global manifests
+manifests = load_manifests()
 
 Label(header, text = "Date: ").pack(side = LEFT)
 date_entry = Entry(header)
@@ -28,9 +29,18 @@ def retrieve_manifests():
     except:
         messagebox.showinfo("Information","Date is invalid.")
         return
-
     global manifests
     manifests = load_manifests(date_entry.get())
+
+    if manifests == False:
+        create = messagebox.askyesno(title = "Load Manifests", message = "There is no manifest file for " + date_entry.get() + ". Would you like to create it now?")
+
+        if create:
+            manifests = update_manifests(True, load_manifests())
+        else:
+            messagebox.showinfo(title = "Load Manifests", message = "Manifests and spreadsheets have not been created for " + date_entry.get() + ".")
+            return
+
     main_frame.destroy()
 
     initialize(root, manifests)
@@ -65,11 +75,8 @@ def populate_manifest(win, manifests):
     orderno = 0
     i = 2
 
-    if not bool(manifests):
-        return
-
     for m in manifests:
-        frame = LabelFrame(win, text = 'Manifest No. ' + str(manifestno), padx = 20, pady = 20)
+        frame = LabelFrame(win, text = 'Manifest No. ' + str(manifestno) + " for " + m.date, padx = 20, pady = 20)
         frame.pack(fill = BOTH, expand = YES)
         
         Label(frame, text = 'Lead').grid(row = i, column = 1) 
@@ -158,13 +165,16 @@ def populate_manifest(win, manifests):
         orders.append(orderno)
         orderno = 0
 
-def update_manifests():
+def update_manifests(new = False, m = manifests):
     # index for looping through work order entries. 
     # example: each manifest has multiple work orders, if manifest 1 has 2 orders, and manifest 2 has 4, 
     # in order to find the 2nd order for the 2nd manifest, that would be index 4 in this case, index 4 for each workorder entry widget
     index = 0
+    if new:
+        main_frame.destroy()
+        initialize(root, m)
 
-    for x in range(len(manifests)):
+    for x in range(len(m)):
         #verify that the date entered is valid
         try:
             datetime.strptime(date_entry.get(), "%m-%d-%Y")
@@ -172,22 +182,23 @@ def update_manifests():
             messagebox.showinfo("Information","Date is invalid.")
             return
 
-        manifests[x].date = date_entry.get()
-        manifests[x].lead = leads[x].get()
-        manifests[x].crew = crews[x].get()
+        m[x].date = date_entry.get()
+        m[x].lead = leads[x].get()
+        m[x].crew = crews[x].get()
 
-        for y in range(len(manifests[x].workorders)):
-            manifests[x].workorders[y].builder = builders[index].get()
-            manifests[x].workorders[y].subdivision = subdivisions[index].get()
-            manifests[x].workorders[y].lot = lots[index].get()
-            manifests[x].workorders[y].windows = windowsL[index].get()
-            manifests[x].workorders[y].doors = doorsL[index].get()
-            manifests[x].workorders[y].notes = notesL[index].get()
+        for y in range(len(m[x].workorders)):
+            m[x].workorders[y].builder = builders[index].get()
+            m[x].workorders[y].subdivision = subdivisions[index].get()
+            m[x].workorders[y].lot = lots[index].get()
+            m[x].workorders[y].windows = windowsL[index].get()
+            m[x].workorders[y].doors = doorsL[index].get()
+            m[x].workorders[y].notes = notesL[index].get()
             index += 1
         
-        create_workbook(manifests[x])
-    save_manifests(manifests)
+        create_workbook(m[x])
+    save_manifests(m)
     messagebox.showinfo("Information", "Manifests saved and spreadsheets have been created.")
+    return m
     
 
 def print_manifests_button():
