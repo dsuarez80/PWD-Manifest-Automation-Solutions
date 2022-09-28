@@ -3,7 +3,7 @@ from tkinter import *
 import tkinter as tk
 from tkinter import ttk, messagebox
 from ManifestGenerator import print_manifests
-from JSONLoader import load_manifests, save_manifests
+from JSONLoader import load_manifests, save_manifests, insert_new_manifest
 from ManifestGenerator import create_workbook
 
 root = tk.Tk() #creating the main window and storing the window object in 'win'
@@ -37,7 +37,7 @@ def retrieve_manifests():
         create = messagebox.askyesno(title = "Load Manifests", message = "There is no manifest file for " + date_entry.get() + ". Would you like to create it now?")
 
         if create:
-            manifests = update_manifests(True, load_manifests())
+            update_manifests(True, load_manifests())
         else:
             messagebox.showinfo(title = "Load Manifests", message = "Manifests and spreadsheets have not been created for " + date_entry.get() + ".")
             return
@@ -198,10 +198,10 @@ def update_manifests(new = False, m = manifests):
         
         if m[x].lead:
             create_workbook(m[x])
-    m = list(filter((lambda x: x.lead != ""), m))
-    save_manifests(m)
+    global manifests
+    manifests = list(filter((lambda x: x.lead != ""), manifests))
+    save_manifests(manifests)
     messagebox.showinfo("Information", "Manifests saved and spreadsheets have been created.")
-    return m
     
 
 def print_manifests_button():
@@ -214,8 +214,10 @@ def print_manifests_button():
     print_manifests(date_entry.get())
 
 def add_manifest():
-    return
+    insert_new_manifest(date_entry.get(), manifests)
+    retrieve_manifests()
 
+#initializes the main frame which houses all manifest entries and scroll bar
 def initialize(root, manifests):
     global main_frame
     main_frame = Frame(root)
@@ -230,6 +232,7 @@ def initialize(root, manifests):
     my_canvas.create_window((0,0), window = second_frame, anchor = "nw")
 
     populate_manifest(second_frame, manifests)
+
 #buttons
 btn = Button(header, text="Load Manifests", padx = 20, command=retrieve_manifests)
 btn.pack(side = LEFT)
@@ -238,10 +241,15 @@ btn2.pack(side = RIGHT)
 btn3 = Button(header, text="Update Manifests", padx = 20, command=update_manifests)
 btn3.pack(side = RIGHT)
 
-#menu_frame = LabelFrame(root, text = "", pady = 5, padx = 20)
-#menu_frame.pack(fill = X)
-#btn4 = Button(menu_frame, text="Add New Manifest", padx = 20, command=add_manifest)
-#btn4.pack(side = LEFT)
+menu_canvas = Canvas(root, width = 600, height = 60)
+menu_canvas.pack(side = TOP, fill = X)
+menu_border_frame = Frame(menu_canvas, padx = 20)
+menu_canvas.create_window((0,0), window = menu_border_frame, anchor = "nw")
+menu_frame = LabelFrame(menu_border_frame, text = "Main Menu", pady = 5, padx = 10)
+menu_frame.pack(side = LEFT, fill = BOTH)
+
+btn4 = Button(menu_frame, text="Add New Manifest", padx = 20, command=add_manifest)
+btn4.pack(side = LEFT)
 
 initialize(root, manifests)
 root.mainloop() #running the loop that works as a trigger

@@ -136,14 +136,13 @@ def save_manifests(manifests):
     with open('Manifest Creator/manifests/manifests ' + manifest_date + ".json", 'w') as jsonFile:
         json.dump(new_manifests, jsonFile)
         
-
-
-def print_example():
-    for m in manifests:
-        for w in m.workorders:
-            print(m.lead, w)
-
-    #json.dump(data, open("manifests/manifests 09-20-2022.json", "w"), indent = 4)
+def insert_new_manifest(givendate, manifests):
+    m = Manifest(givendate, "", "")
+    for i in range(6):
+        workorder = WorkOrder("", "", "", "", "", "")
+        m.add_workorder(workorder)
+    manifests.insert(0, m)
+    save_manifests(manifests)
 
 if __name__ == "__main__":
     #load_manifests()
