@@ -60,7 +60,8 @@ def execute():
         choice = input()[0].lower()
 
         if choice == 'y':
-            print_manifests()
+            print("Printing manifests...")
+            print_manifests(active_date)
             break
         elif choice == 'n':
             print("Printing cancelled.")
@@ -150,13 +151,10 @@ def generate_template(lead_name):
         print("File already exists at:\n", os.path.normpath(final_path))
 
         
-
-def print_manifests():
-    print("Printing manifests...")
-
+def print_manifests(givendate):
     for f in os.listdir(manifests_filepath):
         for files in os.listdir(manifests_filepath + f + "/"):
-            if(files.endswith(active_date + ".xlsx")):
+            if(files.endswith(givendate + ".xlsx")):
                 workbook = load_workbook(manifests_filepath + f + "/" + files)
                 sheet = workbook.active
                 A11 = sheet["A11"].value

@@ -29,6 +29,7 @@ def retrieve_manifests():
     except:
         messagebox.showinfo("Information","Date is invalid.")
         return
+
     global manifests
     manifests = load_manifests(date_entry.get())
 
@@ -204,6 +205,15 @@ def update_manifests(new = False, m = manifests):
     
 
 def print_manifests_button():
+    try:
+        datetime.strptime(date_entry.get(), "%m-%d-%Y")
+    except:
+        messagebox.showinfo("Information","Date is invalid.")
+        return
+
+    print_manifests(date_entry.get())
+
+def add_manifest():
     return
 
 def initialize(root, manifests):
@@ -220,15 +230,18 @@ def initialize(root, manifests):
     my_canvas.create_window((0,0), window = second_frame, anchor = "nw")
 
     populate_manifest(second_frame, manifests)
-
-initialize(root, manifests)
-
-btn=Button(header,text="Load Manifests", padx = 20, command=retrieve_manifests)
+#buttons
+btn = Button(header, text="Load Manifests", padx = 20, command=retrieve_manifests)
 btn.pack(side = LEFT)
-
-btn2=Button(header,text="Print manifests", padx = 20, command=print_manifests_button)
+btn2 = Button(header, text="Print manifests", padx = 20, command=print_manifests_button)
 btn2.pack(side = RIGHT)
-btn3=Button(header,text="Update Manifests", padx = 20, command=update_manifests)
+btn3 = Button(header, text="Update Manifests", padx = 20, command=update_manifests)
 btn3.pack(side = RIGHT)
 
+#menu_frame = LabelFrame(root, text = "", pady = 5, padx = 20)
+#menu_frame.pack(fill = X)
+#btn4 = Button(menu_frame, text="Add New Manifest", padx = 20, command=add_manifest)
+#btn4.pack(side = LEFT)
+
+initialize(root, manifests)
 root.mainloop() #running the loop that works as a trigger
