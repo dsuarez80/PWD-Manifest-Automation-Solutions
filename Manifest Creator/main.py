@@ -1,10 +1,9 @@
-from datetime import datetime
+from datetime import datetime, date
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk, messagebox
-from ManifestGenerator import print_manifests
-from JSONLoader import load_manifests, save_manifests, insert_new_manifest
-from ManifestGenerator import create_workbook
+from ManifestGenerator import print_manifests, create_workbook
+from ManifestLoader import load_manifests, insert_new_manifest
 
 root = tk.Tk() #creating the main window and storing the window object in 'win'
 root.title('Install Manifests') #setting title of the window
@@ -15,29 +14,30 @@ header = Frame(root, pady = 10, padx = 20)
 header.pack(fill = BOTH)
 
 global manifests
-manifests = load_manifests()
+manifests = load_manifests(datetime.strftime(date.today(), "%m-%d-%Y"))
 
 Label(header, text = "Date: ").pack(side = LEFT)
 date_entry = Entry(header)
 date_entry.pack(side = LEFT)
-date = manifests[0].date
-date_entry.insert(0, date)
+date_entry.insert(0, manifests[0].date)
 
-def retrieve_manifests():
+def retrieve_manifests(manifests = manifests):
     try:
-        datetime.strptime(date_entry.get(), "%m-%d-%Y")
+        d = date_entry.get()
+        date_entry.delete(0, END)
+        date_entry.insert(0, date.strftime(datetime.strptime(d, "%m-%d-%Y"), "%m-%d-%Y"))
     except:
-        messagebox.showinfo("Information","Date is invalid.")
+        messagebox.showinfo("Information", "Date is invalid.")
+        date_entry.insert(0, manifests[0].date)
         return
 
-    global manifests
     manifests = load_manifests(date_entry.get())
 
-    if manifests == False:
-        create = messagebox.askyesno(title = "Load Manifests", message = "There is no manifest file for " + date_entry.get() + ". Would you like to create it now?")
+    if not manifests:
+        create = messagebox.askyesno(title = "Load Manifests", message = "There are no manifest files for " + date_entry.get() + ". Would you like to create it now?")
 
         if create:
-            update_manifests(True, load_manifests())
+            update_manifests(True)
         else:
             messagebox.showinfo(title = "Load Manifests", message = "Manifests and spreadsheets have not been created for " + date_entry.get() + ".")
             return
@@ -171,18 +171,16 @@ def update_manifests(new = False, m = manifests):
     # example: each manifest has multiple work orders, if manifest 1 has 2 orders, and manifest 2 has 4, 
     # in order to find the 2nd order for the 2nd manifest, that would be index 4 in this case, index 4 for each workorder entry widget
     index = 0
-    if new:
-        main_frame.destroy()
-        initialize(root, m)
+
+    try:
+        d = date_entry.get()
+        date_entry.delete(0, END)
+        date_entry.insert(0, date.strftime(datetime.strptime(d, "%m-%d-%Y"), "%m-%d-%Y"))
+    except:
+        messagebox.showinfo("Information", "Date is invalid.")
+        return
 
     for x in range(len(m)):
-        #verify that the date entered is valid
-        try:
-            datetime.strptime(date_entry.get(), "%m-%d-%Y")
-        except:
-            messagebox.showinfo("Information","Date is invalid.")
-            return
-
         m[x].date = date_entry.get()
         m[x].lead = leads[x].get()
         m[x].crew = crews[x].get()
@@ -198,17 +196,20 @@ def update_manifests(new = False, m = manifests):
         
         if m[x].lead:
             create_workbook(m[x])
-    global manifests
-    manifests = list(filter((lambda x: x.lead != ""), manifests))
-    save_manifests(manifests)
-    messagebox.showinfo("Information", "Manifests saved and spreadsheets have been created.")
-    
+
+    if new:
+        retrieve_manifests()
+        messagebox.showinfo("Information", "New manifests and spreadsheets have been created for: " + d)
+    else:
+        messagebox.showinfo("Information", "Manifests saved and spreadsheets have been created.")
 
 def print_manifests_button():
     try:
-        datetime.strptime(date_entry.get(), "%m-%d-%Y")
+        d = date_entry.get()
+        date_entry.delete(0, END)
+        date_entry.insert(0, date.strftime(datetime.strptime(d, "%m-%d-%Y"), "%m-%d-%Y"))
     except:
-        messagebox.showinfo("Information","Date is invalid.")
+        messagebox.showinfo("Information", "Date is invalid.")
         return
 
     print_manifests(date_entry.get())

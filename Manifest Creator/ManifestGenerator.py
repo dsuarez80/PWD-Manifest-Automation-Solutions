@@ -3,18 +3,10 @@ import os
 from datetime import datetime, date, timedelta
 
 weekdays = {0 : "MONDAY", 1 : "TUESDAY", 2 : "WEDNESDAY", 3 : "THURSDAY", 4 : "FRIDAY", 5 : "SATURDAY", 6 : "SUNDAY"}
-manifests_filepath = "//dc01/_SHARE/Company/Forms/Daily Job sheets/DAILY JOB SHEETS - SEPTEMBER 2022/Install Manifests/"
-active_date = None
-weekday = None
-crews = []
+months = {1 : "JANUARY", 2 : "FEBRUARY", 3 : "MARCH", 4 : "APRIL", 5 : "MAY", 6 : "JUNE", 7 : "JULY", 8 : "AUGUST", 9 : "SEPTEMBER", 10 : "OCTOBER", 11 : "NOVEMBER", 12 : "DECEMBER"}
+unf_manifests_filepath = "//dc01/_SHARE/Company/Forms/Daily Job sheets/DAILY JOB SHEETS - "
 
 def execute():
-    if os.path.exists(manifests_filepath):
-        print("Manifests filepath:", manifests_filepath)
-    else:
-        print("Manifests filepath does not exist.")
-        exit()
-
     print("How many days ahead of current date?")
     daysn = 0
 
@@ -28,10 +20,13 @@ def execute():
         if choice > 0:
             daysn = choice
             break
+        elif choice == 0:
+            print("Viewing files for today.")
+            break
         else:
             print("No files have been created.")
             exit()
-    
+
     current_day = date.today()
     future_date = current_day + timedelta(days = daysn)
 
@@ -43,12 +38,20 @@ def execute():
     global active_date
     active_date = formatted_date
 
+    manifests_filepath = get_manifests_filepath()
+    if os.path.exists(manifests_filepath):
+        print("Manifests filepath:", manifests_filepath)
+    else:
+        print("Creating Manifests filepath for:\n", manifests_filepath)
+        create_manifests_filepath()
+    
     print("Creating files for", weekday, active_date)
+    global crews
+    crews = []
 
     with open('Manifest Creator/resources/lead_installers.txt') as f:
         lines = f.readlines()
         for line in lines:
-            global crews
             crews.append(line.split())
 
     for crew in crews:
@@ -69,6 +72,34 @@ def execute():
         else:
             print("Invalid.")
 
+def get_manifests_filepath(d = None):
+    if not d:
+        d = active_date
+    month = months[datetime.strptime(d, "%m-%d-%Y").month]
+    year = datetime.strptime(d, "%m-%d-%Y").year
+
+    return unf_manifests_filepath + month + " " + str(year) + "/Install Manifests/"
+
+def create_manifests_filepath(d = None):
+    if not d:
+        d = active_date
+    month = months[datetime.strptime(d, "%m-%d-%Y").month]
+    year = datetime.strptime(d, "%m-%d-%Y").year
+    newdir = unf_manifests_filepath + month + " " + str(year)
+    os.mkdir(newdir)
+    newdir = newdir + "/Install Manifests"
+    os.mkdir(newdir)
+
+    print("Created new Manifests directory at:\n", newdir)
+
+    for f in os.listdir(get_manifests_filepath(datetime.strftime(date.today(), "%m-%d-%Y"))):
+        for lead_folder in os.listdir(get_manifests_filepath + f + "/"):
+            print("\Created new directory for:", lead_folder, "\n")
+            newdir = newdir + "/" + lead_folder
+            os.mkdir(newdir)
+            print(newdir)
+
+#creates manifest spreadsheet from passed in manifest object using workbook template
 def create_workbook(manifest):
     template_name = "INSTALLATION DAILY MANIFEST NAME DATE"
     workbook_path = "Manifest Creator/resources/" + template_name + ".xlsx"
@@ -79,9 +110,6 @@ def create_workbook(manifest):
     
     workbook = load_workbook(workbook_path)
     sheet = workbook.active
-
-    global active_date
-    active_date = manifest.date
     
     sheet["A2"] = manifest.date
     sheet["A3"] = "DATE: " + weekdays[datetime.strptime(manifest.date, "%m-%d-%Y").weekday()]
@@ -99,12 +127,12 @@ def create_workbook(manifest):
         
     template_name = template_name.split(" ")
     template_name = " ".join(template_name[:-2]) + " " + manifest.lead.upper() + " " + manifest.date + ".xlsx"
-    file_path = manifests_filepath + manifest.lead + "/"
+    file_path = get_manifests_filepath(manifest.date) + manifest.lead + "/"
     final_path = file_path + template_name
 
     if not os.path.exists(file_path):
         print("\nDirectory does not exist for:", manifest.lead)
-        new_dir = os.path.join(manifests_filepath, manifest.lead)
+        new_dir = os.path.join(get_manifests_filepath(manifest.date), manifest.lead)
         os.mkdir(new_dir)
         print("Created directory for:", manifest.lead, "under the following filepath:")
         print(new_dir, "\n")
@@ -134,10 +162,11 @@ def generate_template(lead_name):
 
     template_name = template_name.split(" ")
     template_name = " ".join(template_name[:-2]) + " " + lead_name.upper() + " " + active_date + ".xlsx"
-    file_path = manifests_filepath + lead_name + "/"
-    final_path = file_path + template_name
+    manifests_filepath = get_manifests_filepath()
+    lead_name_path = manifests_filepath + lead_name + "/"
+    final_path = lead_name_path + template_name
 
-    if not os.path.exists(file_path):
+    if not os.path.exists(lead_name_path):
         print("\nDirectory does not exist for:", lead_name)
         new_dir = os.path.join(manifests_filepath, lead_name)
         os.mkdir(new_dir)
@@ -152,6 +181,7 @@ def generate_template(lead_name):
 
         
 def print_manifests(givendate):
+    manifests_filepath = get_manifests_filepath(givendate)
     for f in os.listdir(manifests_filepath):
         for files in os.listdir(manifests_filepath + f + "/"):
             if(files.endswith(givendate + ".xlsx")):

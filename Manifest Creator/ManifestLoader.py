@@ -1,10 +1,7 @@
 from openpyxl import load_workbook
 from datetime import datetime
-from ManifestGenerator import manifests_filepath
-import json
+from ManifestGenerator import get_manifests_filepath, create_manifests_filepath
 import os
-
-date = None
 
 class WorkOrder:
     def __str__(self):
@@ -15,27 +12,22 @@ class WorkOrder:
             self.builder = builder
         else:
             self.builder = ""
-        
         if subdivision is not None:
             self.subdivision = subdivision
         else:
             self.subdivision = ""
-
         if lot is not None:
             self.lot = lot
         else:
             self.lot = ""
-
         if windows is not None:
             self.windows = windows
         else:
             self.windows = ""
-
         if doors is not None:
             self.doors = doors
         else:
             self.doors = ""
-
         if notes is not None:
             self.notes = notes
         else:
@@ -61,16 +53,28 @@ class Manifest:
     def add_workorder(self, workorder):
         self.workorders.append(workorder)
 
-def load_spreadsheets(givendate):
+def create_new_manifests(givendate):
     manifests = []
 
+def load_manifests(givendate):
+    manifests = []
+    manifests_filepath = get_manifests_filepath(givendate)
+
+    if not os.path.exists(manifests_filepath):
+        create_manifests_filepath(givendate)
+        return
+
     for f in os.listdir(manifests_filepath):
-        for file in os.listdir(manifests_filepath + f + "/"):
+        for file in os.listdir(manifests_filepath + f + "/"): 
             if(file.endswith(givendate + ".xlsx")):
-                print("Found file for", givendate, file)
-                workbook = load_workbook(manifests_filepath + f + "/" + file)
+                print("Found manifest file:", file)
+                workbook = load_workbook(get_manifests_filepath(givendate) + f + "/" + file)
                 sheet = workbook.active
-                manifest = Manifest(str(givendate), f.upper(), sheet["D7"].value[6:].split(", "))              
+
+                lead = f.upper()
+                crew = ' '.join(sheet["D7"].value[6:].split(", "))
+
+                manifest = Manifest(givendate, lead, crew)              
 
                 for i in range(6):
                     cellrow = str(i + 11)
@@ -83,58 +87,8 @@ def load_spreadsheets(givendate):
                         sheet["F" + cellrow].value)
                     manifest.add_workorder(workorder)
                 manifests.append(manifest)
-    if manifests:
-        save_manifests(manifests)
+    print()
     return manifests
-
-def load_manifests(givendate = False):
-    global manifests
-    manifests = []
-    dates = []
-
-    for f in os.listdir("Manifest Creator/manifests/"):
-        d = f.split()[1][:-5]
-        dates.append(d)
-
-    latest = max(dates, key = lambda d: datetime.strptime(d, '%m-%d-%Y'))
-    if givendate is not False:
-        latest = givendate
-        if not os.path.exists("Manifest Creator/manifests/manifests " + latest + ".json"):
-            manifests = load_spreadsheets(givendate)
-            if not manifests:
-                return False
-            return manifests
-
-    with open('Manifest Creator/manifests/manifests ' + latest + '.json', "r+") as f:
-        data = json.load(f)
-
-        for m in data["manifests"]:
-            manifest = Manifest(data["date"], m["lead"], m["crew"])
-
-            for w in m["workorders"]:
-                workorder = WorkOrder(w["builder"], w["subdivision"], w["lot"], w["windows"], w["doors"], w["notes"])
-                manifest.add_workorder(workorder)
-            manifests.append(manifest)
-    return manifests
-
-def save_manifests(manifests):
-    new_manifests = {}
-    manifest_date = manifests[0].date
-    new_manifests["date"] = manifest_date
-    new_manifests["manifests"] = []
-    for m in manifests:
-        workorders = []
-        for w in m.workorders:
-            workorders.append(w.get_order())
-
-        new_manifests["manifests"].append({
-            "lead" : m.lead,
-            "crew" : m.crew,
-            "workorders" : workorders 
-        })
-
-    with open('Manifest Creator/manifests/manifests ' + manifest_date + ".json", 'w') as jsonFile:
-        json.dump(new_manifests, jsonFile)
         
 def insert_new_manifest(givendate, manifests):
     m = Manifest(givendate, "", "")
@@ -142,9 +96,6 @@ def insert_new_manifest(givendate, manifests):
         workorder = WorkOrder("", "", "", "", "", "")
         m.add_workorder(workorder)
     manifests.insert(0, m)
-    save_manifests(manifests)
 
 if __name__ == "__main__":
-    #load_manifests()
-    #save_manifests()
-    print("Please run main.py")
+    import main
