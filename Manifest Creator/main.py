@@ -229,6 +229,7 @@ def initialize(root, manifests):
     my_scrollbar.pack(side = RIGHT, fill = Y)
     my_canvas.configure(yscrollcommand = my_scrollbar.set)
     my_canvas.bind('<Configure>', lambda e: my_canvas.configure(scrollregion = my_canvas.bbox("all")))
+    root.bind_all('<MouseWheel>', lambda event: my_canvas.yview_scroll(int(-1*(event.delta/120)), "units"))
     second_frame = Frame(my_canvas, padx = 20)
     my_canvas.create_window((0,0), window = second_frame, anchor = "nw")
 
