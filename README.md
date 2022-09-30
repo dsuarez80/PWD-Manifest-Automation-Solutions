@@ -27,7 +27,7 @@ date, determined by a timedelta equation of x amount of days ahead of the curren
 Other Important Project Dependencies
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 This program is designed to work with a very specific file structure as initialized within the 'ManifestGenerator.py' file. The 'unf_manifests_filepath' variable
-and the 'get_manifests_filepath' methods are used to determine where the manifest spreadsheets are read from and stored.
+and the 'get_manifests_filepath' method are used to determine where the manifest spreadsheets are read from and stored.
 
 
 Author
