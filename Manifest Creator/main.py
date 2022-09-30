@@ -34,7 +34,7 @@ def retrieve_manifests(manifests = manifests):
     manifests = load_manifests(date_entry.get())
 
     if not manifests:
-        create = messagebox.askyesno(title = "Load Manifests", message = "There are no manifest files for " + date_entry.get() + ". Would you like to create it now?")
+        create = messagebox.askyesno(title = "Load Manifests", message = "There are no manifest files for " + date_entry.get() + ". Would you like to create them now?")
 
         if create:
             update_manifests(True)
