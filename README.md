@@ -34,7 +34,7 @@ Installation Notes
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 This program was written in python 3.10.7 64-bit (microsoft store version). An installation of python's openpyxl library is required.
 
-1. 'main.py' - Written using Python's standard GUI module. This runs the main GUI of the application, by default loading all manifest files for the current 
+1. 'main.py' - Written using Python's standard GUI module: 'Tkinter'. This runs the main GUI of the application, by default loading all manifest files for the current 
 day, with functionality to load a manifest file for a given day, functionality to create a new manifest file by providing a date of files which do not exist 
 yet, updating existing manifests from the provided inputs, as well as the ability to print all manifest files for the date provided.
 
