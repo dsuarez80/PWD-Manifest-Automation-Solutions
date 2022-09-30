@@ -32,15 +32,14 @@ manifest files which do not have the builder field for the first work order fill
 
 Installation Notes
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
-This program was written in python 3.10.7 64-bit (microsoft store version). An installation of python's openpyxl library is required.
+This program was written in python 3.10.7 64-bit (microsoft store version). 
 
-1. 'main.py' - Written using Python's standard GUI module: 'Tkinter'. This runs the main GUI of the application, by default loading all manifest files for the current 
-day, with functionality to load a manifest file for a given day, functionality to create a new manifest file by providing a date of files which do not exist 
-yet, updating existing manifests from the provided inputs, as well as the ability to print all manifest files for the date provided.
+- An installation of python's openpyxl library is required.
 
-2. 'ManifestGenerator.py' - This file contains a lot of the core functionality of the project such as creation of excel workbooks and other various essential 
-program logic. This file is also runnable, however its functions are limited to creating new manifest files and printing all manifest files for a given 
-date, determined by a timedelta equation of x amount of days ahead of the current day.
+1. 'main.py' - Written using Python's standard GUI module: 'Tkinter'. Run this to start the application.
+
+2. 'ManifestGenerator.py' - Mainly contains program logic. This file is also runnable, however its functions are limited to creating new manifest files and 
+printing all manifest files for a given date, determined by a timedelta equation of x amount of days ahead of the current day.
 
 3. 'ManifestLoader.py' - Mainly contains program logic, however running this file will instead import 'main.py', triggering that file to run instead.
 
