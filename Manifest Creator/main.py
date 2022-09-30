@@ -8,8 +8,7 @@ from ManifestLoader import load_manifests, insert_new_manifest
 root = tk.Tk() #creating the main window and storing the window object in 'win'
 root.title('Install Manifests') #setting title of the window
 root.geometry("1400x900") #setting the size of the window
-root.resizable(False, False) #making neither the x or y resizable for the window
-
+root.resizable(False, False) #making neither the x nor y resizable for the window
 header = Frame(root, pady = 10, padx = 20)
 header.pack(fill = BOTH)
 
@@ -35,9 +34,9 @@ def retrieve_manifests(manifests = manifests):
 
     if not manifests:
         create = messagebox.askyesno(title = "Load Manifests", message = "There are no manifest files for " + date_entry.get() + ". Would you like to create them now?")
-
         if create:
             update_manifests(True)
+            return
         else:
             messagebox.showinfo(title = "Load Manifests", message = "Manifests and spreadsheets have not been created for " + date_entry.get() + ".")
             return
@@ -68,12 +67,8 @@ def populate_manifest(win, manifests):
     global erasebtns
     erasebtns = []
     #^these are widgets, not the values stored in manifests object list, though they do contain the values of the data in the entry widget
-    #test comment
-
-    orders = []
 
     manifestno = 1
-    orderno = 0
     i = 2
 
     for m in manifests:
@@ -101,11 +96,10 @@ def populate_manifest(win, manifests):
                 notesL[i].insert(0, "")
         
         erasebtn = Button(frame, text = "Erase Entries", command = erase_manifest)
-        erasebtn.grid(row = i, column = 0)
+        erasebtn.grid(row = i + 1, column = 0, padx = 5, pady = 5)
         erasebtns.append(erasebtn)
 
         manifestno += 1
-
 
         lead = Entry(frame)
         lead.grid(row = i, column = 1, ipadx = 60)
@@ -127,10 +121,6 @@ def populate_manifest(win, manifests):
         i += 1
 
         for workorder in m.workorders:
-            orderno += 1
-
-            Label(frame, text = "Work Order: " + str(orderno)).grid(row = i, column = 0)
-
             builder = Entry(frame)
             builder.grid(row = i, column = 1, ipadx = 60)
             builder.insert(0, workorder.builder)
@@ -162,9 +152,6 @@ def populate_manifest(win, manifests):
             notesL.append(notes)
 
             i += 1
-
-        orders.append(orderno)
-        orderno = 0
 
 def update_manifests(new = False, m = manifests):
     # index for looping through work order entries. 
@@ -198,8 +185,8 @@ def update_manifests(new = False, m = manifests):
             create_workbook(m[x])
 
     if new:
-        retrieve_manifests()
         messagebox.showinfo("Information", "New manifests and spreadsheets have been created for: " + d)
+        retrieve_manifests()
     else:
         messagebox.showinfo("Information", "Manifests saved and spreadsheets have been created.")
 
@@ -238,7 +225,7 @@ def initialize(root, manifests):
 #buttons
 btn = Button(header, text="Load Manifests", padx = 20, command=retrieve_manifests)
 btn.pack(side = LEFT)
-btn2 = Button(header, text="Print manifests", padx = 20, command=print_manifests_button)
+btn2 = Button(header, text="Print Manifests", padx = 20, command=print_manifests_button)
 btn2.pack(side = RIGHT)
 btn3 = Button(header, text="Update Manifests", padx = 20, command=update_manifests)
 btn3.pack(side = RIGHT)

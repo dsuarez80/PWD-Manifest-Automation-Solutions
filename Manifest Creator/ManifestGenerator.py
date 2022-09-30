@@ -92,13 +92,6 @@ def create_manifests_filepath(d = None):
 
     print("Created new Manifests directory at:\n", newdir)
 
-    for f in os.listdir(get_manifests_filepath(datetime.strftime(date.today(), "%m-%d-%Y"))):
-        for lead_folder in os.listdir(get_manifests_filepath + f + "/"):
-            print("\Created new directory for:", lead_folder, "\n")
-            newdir = newdir + "/" + lead_folder
-            os.mkdir(newdir)
-            print(newdir)
-
 #creates manifest spreadsheet from passed in manifest object using workbook template
 def create_workbook(manifest):
     template_name = "INSTALLATION DAILY MANIFEST NAME DATE"
