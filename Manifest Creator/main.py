@@ -12,7 +12,6 @@ root.resizable(False, False) #making neither the x nor y resizable for the windo
 header = Frame(root, pady = 10, padx = 20)
 header.pack(fill = BOTH)
 
-global manifests
 manifests = load_manifests(datetime.strftime(date.today(), "%m-%d-%Y"))
 
 Label(header, text = "Date: ").pack(side = LEFT)
@@ -32,7 +31,13 @@ def retrieve_manifests(manifests = manifests):
         date_entry.insert(0, manifests[0].date)
         return
 
+    global saved
+    if not saved:
+        if not messagebox.askyesno(title = "Load Manifests", message = "Changes not saved.\n\nAttempt to load new manifests anyway?"):
+            return
+
     manifests = load_manifests(date_entry.get())
+    saved = True
 
     if not manifests:
         create = messagebox.askyesno(title = "Load Manifests", message = "There are no manifest files for " + date_entry.get() + ". Would you like to create them now?")
@@ -235,7 +240,7 @@ def fake_print():
 def print_manifests_button():
     global saved
     if not saved:
-        if not messagebox.askyesno("Information", "Changes not saved. Print anyway?"):
+        if not messagebox.askyesno("Information", "Changes not saved.\n\nPrint anyway?"):
             return
     try:
         d = date_entry.get()
