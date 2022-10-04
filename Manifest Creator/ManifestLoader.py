@@ -88,14 +88,17 @@ def load_manifests(givendate):
                     manifest.add_workorder(workorder)
                 manifests.append(manifest)
     print()
+    filter((lambda x: x.lead != ''), manifests)
     return manifests
         
 def insert_new_manifest(givendate, manifests):
+    manifests = list(filter((lambda x: x.lead != ''), manifests))
     m = Manifest(givendate, "", "")
     for i in range(6):
         workorder = WorkOrder("", "", "", "", "", "")
         m.add_workorder(workorder)
     manifests.insert(0, m)
+    return manifests
 
 if __name__ == "__main__":
     import main

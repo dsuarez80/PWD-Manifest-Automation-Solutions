@@ -20,6 +20,8 @@ date_entry = Entry(header)
 date_entry.pack(side = LEFT)
 date_entry.insert(0, manifests[0].date)
 
+saved = True
+
 def retrieve_manifests(manifests = manifests):
     try:
         d = date_entry.get()
@@ -42,8 +44,8 @@ def retrieve_manifests(manifests = manifests):
             return
 
     main_frame.destroy()
-
     initialize(root, manifests)
+
 
 def populate_manifest(win, manifests):
     #lists of each entry widget
@@ -63,13 +65,16 @@ def populate_manifest(win, manifests):
     doorsL = []
     global notesL
     notesL = []
-
-    global erasebtns
-    erasebtns = []
     #^these are widgets, not the values stored in manifests object list, though they do contain the values of the data in the entry widget
 
+    global v
+    v = []
     manifestno = 1
     i = 2
+
+    def not_saved(*args):
+        global saved
+        saved = False
 
     for m in manifests:
         frame = LabelFrame(win, text = 'Manifest No. ' + str(manifestno) + " for " + m.date, padx = 20, pady = 20)
@@ -94,21 +99,25 @@ def populate_manifest(win, manifests):
                 windowsL[i].insert(0, "")
                 doorsL[i].insert(0, "")
                 notesL[i].insert(0, "")
+            not_saved()
         
         erasebtn = Button(frame, text = "Erase Entries", command = erase_manifest)
         erasebtn.grid(row = i + 1, column = 0, padx = 5, pady = 5)
-        erasebtns.append(erasebtn)
 
         manifestno += 1
 
-        lead = Entry(frame)
+        lev = tk.StringVar()
+        lead = Entry(frame, textvariable = lev)
         lead.grid(row = i, column = 1, ipadx = 60)
         lead.insert(0, m.lead)
+        v.append(lev)
         leads.append(lead)
 
-        crew = Entry(frame)
+        cv = tk.StringVar()
+        crew = Entry(frame, textvariable = cv)
         crew.grid(row = i, column = 2, ipadx = 60)
         crew.insert(0, m.crew)
+        v.append(cv)
         crews.append(crew)
         i += 1
 
@@ -121,37 +130,52 @@ def populate_manifest(win, manifests):
         i += 1
 
         for workorder in m.workorders:
-            builder = Entry(frame)
+            bv = tk.StringVar()
+            builder = Entry(frame, textvariable = bv)
             builder.grid(row = i, column = 1, ipadx = 60)
             builder.insert(0, workorder.builder)
+            v.append(bv)
             builders.append(builder)
 
-            subdivision = Entry(frame)
+            sv = tk.StringVar()
+            subdivision = Entry(frame, textvariable = sv)
             subdivision.grid(row = i, column = 2, ipadx = 60)
             subdivision.insert(0, workorder.subdivision)
+            v.append(sv)
             subdivisions.append(subdivision)
             
-            lot = Entry(frame)
+            lv = tk.StringVar()
+            lot = Entry(frame, textvariable = lv)
             lot.grid(row = i, column = 3)
             lot.insert(0, workorder.lot)
+            v.append(lv)
             lots.append(lot)
 
-            windows = Entry(frame)
+            wv = tk.StringVar()
+            windows = Entry(frame, textvariable = wv)
             windows.grid(row = i, column = 4, ipadx = 30)
             windows.insert(0, workorder.windows)
+            v.append(wv)
             windowsL.append(windows)
       
-            doors = Entry(frame)
+            dv = tk.StringVar()
+            doors = Entry(frame, textvariable = dv)
             doors.grid(row = i, column = 5, ipadx = 30)
             doors.insert(0, workorder.doors)
+            v.append(dv)
             doorsL.append(doors)
 
-            notes = Entry(frame)
+            nv = tk.StringVar()
+            notes = Entry(frame, textvariable = nv)
             notes.grid(row = i, column = 6, ipadx = 60)
             notes.insert(0, workorder.notes)
+            v.append(nv)
             notesL.append(notes)
 
             i += 1
+    
+    for x in v:
+        x.trace("w", not_saved)
 
 def update_manifests(new = False, m = manifests):
     # index for looping through work order entries. 
@@ -189,8 +213,30 @@ def update_manifests(new = False, m = manifests):
         retrieve_manifests()
     else:
         messagebox.showinfo("Information", "Manifests saved and spreadsheets have been created.")
+    
+    global saved
+    saved = True
+
+def fake_print():
+    global saved
+    if not saved:
+        if not messagebox.askyesno("Information", "Changes not saved.\n\nPrint anyway?"):
+            return
+    try:
+        d = date_entry.get()
+        date_entry.delete(0, END)
+        date_entry.insert(0, date.strftime(datetime.strptime(d, "%m-%d-%Y"), "%m-%d-%Y"))
+    except:
+        messagebox.showinfo("Information", "Date is invalid.")
+        return
+    
+    print("printing hehe", date_entry.get())
 
 def print_manifests_button():
+    global saved
+    if not saved:
+        if not messagebox.askyesno("Information", "Changes not saved. Print anyway?"):
+            return
     try:
         d = date_entry.get()
         date_entry.delete(0, END)
@@ -202,8 +248,9 @@ def print_manifests_button():
     print_manifests(date_entry.get())
 
 def add_manifest():
-    insert_new_manifest(date_entry.get(), manifests)
-    retrieve_manifests()
+    m = insert_new_manifest(date_entry.get(), manifests)
+    main_frame.destroy()
+    initialize(root, m)
 
 #initializes the main frame which houses all manifest entries and scroll bar
 def initialize(root, manifests):
@@ -225,7 +272,9 @@ def initialize(root, manifests):
 #buttons
 btn = Button(header, text="Load Manifests", padx = 20, command=retrieve_manifests)
 btn.pack(side = LEFT)
-btn2 = Button(header, text="Print Manifests", padx = 20, command=print_manifests_button)
+date_entry.bind('<Return>', retrieve_manifests)
+
+btn2 = Button(header, text="Print Manifests", padx = 20, command=fake_print)
 btn2.pack(side = RIGHT)
 btn3 = Button(header, text="Update Manifests", padx = 20, command=update_manifests)
 btn3.pack(side = RIGHT)
@@ -241,4 +290,12 @@ btn4 = Button(menu_frame, text="Add New Manifest", padx = 20, command=add_manife
 btn4.pack(side = LEFT)
 
 initialize(root, manifests)
+
+def ask_quit():
+    if saved:
+        root.destroy()
+    elif messagebox.askyesno("Quit", "Changes not saved.\n\nAre you sure you want to quit?"):
+        root.destroy()
+
+root.protocol("WM_DELETE_WINDOW", ask_quit)
 root.mainloop() #running the loop that works as a trigger
