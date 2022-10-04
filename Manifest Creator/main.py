@@ -274,7 +274,7 @@ btn = Button(header, text="Load Manifests", padx = 20, command=retrieve_manifest
 btn.pack(side = LEFT)
 date_entry.bind('<Return>', retrieve_manifests)
 
-btn2 = Button(header, text="Print Manifests", padx = 20, command=fake_print)
+btn2 = Button(header, text="Print Manifests", padx = 20, command=print_manifests_button)
 btn2.pack(side = RIGHT)
 btn3 = Button(header, text="Update Manifests", padx = 20, command=update_manifests)
 btn3.pack(side = RIGHT)
