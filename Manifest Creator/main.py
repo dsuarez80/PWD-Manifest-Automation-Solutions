@@ -2,7 +2,7 @@ from datetime import datetime, date
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk, messagebox
-from ManifestGenerator import print_manifests, create_workbook
+from ManifestGenerator import print_manifests, create_workbook, print_manifest
 from ManifestLoader import load_manifests, insert_new_manifest
 
 root = tk.Tk() #creating the main window and storing the window object in 'win'
@@ -89,6 +89,20 @@ def populate_manifest(win, manifests):
         Label(frame, text = 'Crew').grid(row = i, column = 2) 
         i += 1
 
+        lev = tk.StringVar()
+        lead = Entry(frame, textvariable = lev)
+        lead.grid(row = i, column = 1, ipadx = 60)
+        lead.insert(0, m.lead)
+        v.append(lev)
+        leads.append(lead)
+
+        cv = tk.StringVar()
+        crew = Entry(frame, textvariable = cv)
+        crew.grid(row = i, column = 2, ipadx = 60)
+        crew.insert(0, m.crew)
+        v.append(cv)
+        crews.append(crew)
+
         def erase_manifest(x = manifestno):
             for i in range((x-1)*6, (x)*6):
                 builders[i].delete(0, END)
@@ -105,25 +119,21 @@ def populate_manifest(win, manifests):
                 doorsL[i].insert(0, "")
                 notesL[i].insert(0, "")
             not_saved()
-        
+
+        def print_manifest_button(x = lead.get()):
+            try:
+                d = date_entry.get()
+                date_entry.delete(0, END)
+                date_entry.insert(0, date.strftime(datetime.strptime(d, "%m-%d-%Y"), "%m-%d-%Y"))
+                d = date_entry.get()
+                print_manifest(x, d)
+            except:
+                messagebox.showinfo("Information", "Date is invalid.")
+                return
+        printbtn = Button(frame, text = "Print Manifest", command = print_manifest_button)
+        printbtn.grid(row = i, column = 0, padx = 5)
         erasebtn = Button(frame, text = "Erase Entries", command = erase_manifest)
-        erasebtn.grid(row = i + 1, column = 0, padx = 5, pady = 5)
-
-        manifestno += 1
-
-        lev = tk.StringVar()
-        lead = Entry(frame, textvariable = lev)
-        lead.grid(row = i, column = 1, ipadx = 60)
-        lead.insert(0, m.lead)
-        v.append(lev)
-        leads.append(lead)
-
-        cv = tk.StringVar()
-        crew = Entry(frame, textvariable = cv)
-        crew.grid(row = i, column = 2, ipadx = 60)
-        crew.insert(0, m.crew)
-        v.append(cv)
-        crews.append(crew)
+        erasebtn.grid(row = i + 2, column = 0, padx = 5)
         i += 1
 
         Label(frame, text = 'Builder').grid(row = i, column = 1)
@@ -137,48 +147,48 @@ def populate_manifest(win, manifests):
         for workorder in m.workorders:
             bv = tk.StringVar()
             builder = Entry(frame, textvariable = bv)
-            builder.grid(row = i, column = 1, ipadx = 60)
+            builder.grid(row = i, column = 1, ipadx = 60, ipady = 3)
             builder.insert(0, workorder.builder)
             v.append(bv)
             builders.append(builder)
 
             sv = tk.StringVar()
             subdivision = Entry(frame, textvariable = sv)
-            subdivision.grid(row = i, column = 2, ipadx = 60)
+            subdivision.grid(row = i, column = 2, ipadx = 60, ipady = 3)
             subdivision.insert(0, workorder.subdivision)
             v.append(sv)
             subdivisions.append(subdivision)
             
             lv = tk.StringVar()
             lot = Entry(frame, textvariable = lv)
-            lot.grid(row = i, column = 3)
+            lot.grid(row = i, column = 3, ipady = 3)
             lot.insert(0, workorder.lot)
             v.append(lv)
             lots.append(lot)
 
             wv = tk.StringVar()
             windows = Entry(frame, textvariable = wv)
-            windows.grid(row = i, column = 4, ipadx = 30)
+            windows.grid(row = i, column = 4, ipadx = 30, ipady = 3)
             windows.insert(0, workorder.windows)
             v.append(wv)
             windowsL.append(windows)
       
             dv = tk.StringVar()
             doors = Entry(frame, textvariable = dv)
-            doors.grid(row = i, column = 5, ipadx = 30)
+            doors.grid(row = i, column = 5, ipadx = 30, ipady = 3)
             doors.insert(0, workorder.doors)
             v.append(dv)
             doorsL.append(doors)
 
             nv = tk.StringVar()
             notes = Entry(frame, textvariable = nv)
-            notes.grid(row = i, column = 6, ipadx = 60)
+            notes.grid(row = i, column = 6, ipadx = 60, ipady = 3)
             notes.insert(0, workorder.notes)
             v.append(nv)
             notesL.append(notes)
 
             i += 1
-    
+        manifestno += 1
     for x in v:
         x.trace("w", not_saved)
 

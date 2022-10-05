@@ -176,17 +176,27 @@ def generate_template(lead_name):
 def print_manifests(givendate):
     manifests_filepath = get_manifests_filepath(givendate)
     for f in os.listdir(manifests_filepath):
-        for files in os.listdir(manifests_filepath + f + "/"):
-            if(files.endswith(givendate + ".xlsx")):
-                workbook = load_workbook(manifests_filepath + f + "/" + files)
+        for file in os.listdir(manifests_filepath + f + "/"):
+            if(file.endswith(givendate + ".xlsx")):
+                workbook = load_workbook(manifests_filepath + f + "/" + file)
                 sheet = workbook.active
                 A11 = sheet["A11"].value
 
                 if not A11 == None:
                     print("Printing manifest for:", f)
-                    os.startfile(os.path.normpath(manifests_filepath + f + "/" + files), "print")
+                    os.startfile(os.path.normpath(manifests_filepath + f + "/" + file), "print")
                 else:
                     print("Manifest for", f, "is incomplete. Print Aborted.")
 
+def print_manifest(lead, givendate):
+    manifests_filepath = get_manifests_filepath(givendate)
+    for f in os.listdir(manifests_filepath):
+        if f.upper() == lead.upper():
+            for file in os.listdir(manifests_filepath + f + "/"):
+                if file.endswith(lead + " " + givendate + ".xlsx"):
+                    print("Printing manifest file:", file)
+                    os.startfile(os.path.normpath(manifests_filepath + f + "/" + file), "print")
+    print()
+    
 if __name__ == "__main__":
     execute()
