@@ -29,6 +29,13 @@ the program. Changing the contents and keeping the date the same then chosing to
 - The 'Print Manifests' button will print all manifests to the machine's default printer for the given date. This function will exclude any spreadsheet
 manifest files which do not have the builder field for the first work order filled it as it will assume the manifest is incomplete.
 
+- The date within the date entry box is the active date, meaning this is the date that will be used to create new manifests from, and will overwrite any
+manifests that already exist within this date. The date written on each manifest form such as "Manifest No. 7 for 10-11-2022" is the manifest file of that
+date that was loaded into the program. Any changes saved however, still only affect files for the provided active date. 
+Example: you load files for the 12th, manifests will be loaded for the 12th, you then change the active date to the 11th and choose to update your currently 
+loaded manifests from the 12th, the manifests on the 11th will be overwritten from the 12th as the data from the 12th is what is currently loaded and the 
+11th is the active date.
+
 
 Installation Notes
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -38,16 +45,22 @@ This program was written in python 3.10.7 64-bit (microsoft store version).
 
 1. 'main.py' - Written using Python's standard GUI module: 'Tkinter'. Run this to start the application.
 
-2. 'ManifestGenerator.py' - Mainly contains program logic. This file is also runnable, however its functions are limited to creating new manifest files and 
-printing all manifest files for a given date, determined by a timedelta equation of x amount of days ahead of the current day.
+2. 'ManifestGenerator.py' - Mainly contains program logic. This file is also runnable, however its functions are limited to creating blank new manifest files 
+and printing all manifest files for a given date, determined by a equation of x amount of days ahead of the current day.
 
 3. 'ManifestLoader.py' - Mainly contains program logic, however running this file will instead import 'main.py', triggering that file to run instead.
 
 
-Other Important Project Dependencies
+Important Program Limitations
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
-This program is designed to work with a very specific file structure as initialized within the 'ManifestGenerator.py' file. The 'unf_manifests_filepath' variable
-and the 'get_manifests_filepath' method are used to determine where the manifest spreadsheets are read from and stored.
+This program is designed to work with a very specific folder structure as initialized within the 'ManifestGenerator.py' file. The 'unf_manifests_filepath' 
+variable and the 'get_manifests_filepath' method are used to determine where the manifest spreadsheets are read from and stored.
+
+Manifest naming convention is also very important as the only files it can find are spreadsheets following the exact naming convention of: 
+'INSTALLATION DAILY MANIFEST NAME MM-DD-YYYY.xlsx'
+
+Any manifests created before 09-19-2022 will not be found as the date in the names of those files do not follow the date format of the program. In order 
+to read those files, the dates in each of those file names must be manually changed to follow the date format of MM-DD-YYYY.
 
 
 Author

@@ -1,5 +1,5 @@
 from openpyxl import load_workbook
-import os
+import os, subprocess
 from datetime import datetime, date, timedelta
 
 weekdays = {0 : "MONDAY", 1 : "TUESDAY", 2 : "WEDNESDAY", 3 : "THURSDAY", 4 : "FRIDAY", 5 : "SATURDAY", 6 : "SUNDAY"}
@@ -195,8 +195,19 @@ def print_manifest(lead, givendate):
             for file in os.listdir(manifests_filepath + f + "/"):
                 if file.endswith(lead + " " + givendate + ".xlsx"):
                     print("Printing manifest file:", file)
-                    os.startfile(os.path.normpath(manifests_filepath + f + "/" + file), "print")
+                    p = os.path.normpath(manifests_filepath + f + "/" + file)
+                    os.startfile(p, "print")
     print()
-    
+
+def open_file(lead, givendate):
+    manifests_filepath = get_manifests_filepath(givendate)
+    for f in os.listdir(manifests_filepath):
+        if f.upper() == lead.upper():
+            for file in os.listdir(manifests_filepath + f + "/"):
+                if file.endswith(lead + " " + givendate + ".xlsx"):
+                    p = os.path.normpath(manifests_filepath + f + "/" + file)
+                    subprocess.Popen(r'explorer /select,' + '"' + p + '"')
+                    os.startfile(p)
+                    
 if __name__ == "__main__":
     execute()

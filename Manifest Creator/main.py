@@ -1,8 +1,8 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk, messagebox
-from ManifestGenerator import print_manifests, create_workbook, print_manifest
+from ManifestGenerator import print_manifests, create_workbook, print_manifest, open_file
 from ManifestLoader import load_manifests, insert_new_manifest
 
 root = tk.Tk() #creating the main window and storing the window object in 'win'
@@ -14,14 +14,53 @@ header.pack(fill = BOTH)
 
 manifests = load_manifests(datetime.strftime(date.today(), "%m-%d-%Y"))
 
-Label(header, text = "Date: ").pack(side = LEFT)
 date_entry = Entry(header)
-date_entry.pack(side = LEFT)
 date_entry.insert(0, manifests[0].date)
+
+def prev_day():
+    try:
+        o = datetime.strptime(date_entry.get(), "%m-%d-%Y")
+        d = o + timedelta(days = -1)
+        if d.weekday() == 6:
+            d = o + timedelta(days = -2)
+        d = date.strftime(d, "%m-%d-%Y")
+        date_entry.delete(0, END)
+        date_entry.insert(0, d)
+        retrieve_manifests(o = date.strftime(o, "%m-%d-%Y"))
+    except:
+        messagebox.showinfo("Information", "Date is invalid.")
+        date_entry.insert(0, manifests[0].date)
+        return
+
+def next_day():
+    try:
+        o = datetime.strptime(date_entry.get(), "%m-%d-%Y")
+        d = o + timedelta(days = 1)
+        if d.weekday() == 6:
+            d = o + timedelta(days = 2)
+        d = date.strftime(d, "%m-%d-%Y")
+        date_entry.delete(0, END)
+        date_entry.insert(0, d)
+        retrieve_manifests(o = date.strftime(o, "%m-%d-%Y"))
+    except:
+        messagebox.showinfo("Information", "Date is invalid.")
+        date_entry.insert(0, manifests[0].date)
+        return
+
+Label(header, text = "Date: ").pack(side = LEFT)
+
+prevbtn = Button(header, text="<", command = prev_day)
+prevbtn.pack(side = LEFT)
+
+date_entry.pack(side = LEFT)
+
+nextbtn = Button(header, text=">", command = next_day)
+nextbtn.pack(side = LEFT)
 
 saved = True
 
-def retrieve_manifests(manifests = manifests):
+def retrieve_manifests(*args, o = None):
+    global manifests
     try:
         d = date_entry.get()
         date_entry.delete(0, END)
@@ -34,6 +73,9 @@ def retrieve_manifests(manifests = manifests):
     global saved
     if not saved:
         if not messagebox.askyesno(title = "Load Manifests", message = "Changes not saved.\n\nAttempt to load new manifests anyway?"):
+            if o:
+                date_entry.delete(0, END)
+                date_entry.insert(0, o)
             return
 
     manifests = load_manifests(date_entry.get())
@@ -46,13 +88,16 @@ def retrieve_manifests(manifests = manifests):
             return
         else:
             messagebox.showinfo(title = "Load Manifests", message = "Manifests and spreadsheets have not been created for " + date_entry.get() + ".")
+            if o:
+                date_entry.delete(0, END)
+                date_entry.insert(0, o)
             return
 
     main_frame.destroy()
-    initialize(root, manifests)
+    initialize(root)
 
 
-def populate_manifest(win, manifests):
+def populate_manifest(win):
     #lists of each entry widget
     global leads
     leads = []
@@ -103,6 +148,28 @@ def populate_manifest(win, manifests):
         v.append(cv)
         crews.append(crew)
 
+        def print_manifest_button(x = lead.get()):
+            try:
+                d = date_entry.get()
+                date_entry.delete(0, END)
+                date_entry.insert(0, date.strftime(datetime.strptime(d, "%m-%d-%Y"), "%m-%d-%Y"))
+                d = date_entry.get()
+                print_manifest(x, d)
+            except:
+                messagebox.showinfo("Information", "Date is invalid.")
+                return
+
+        def open_file_button(x = lead.get()):
+            try:
+                d = date_entry.get()
+                date_entry.delete(0, END)
+                date_entry.insert(0, date.strftime(datetime.strptime(d, "%m-%d-%Y"), "%m-%d-%Y"))
+                d = date_entry.get()
+                open_file(x, d)
+            except:
+                messagebox.showinfo("Information", "Date is invalid.")
+                return
+
         def erase_manifest(x = manifestno):
             for i in range((x-1)*6, (x)*6):
                 builders[i].delete(0, END)
@@ -120,20 +187,13 @@ def populate_manifest(win, manifests):
                 notesL[i].insert(0, "")
             not_saved()
 
-        def print_manifest_button(x = lead.get()):
-            try:
-                d = date_entry.get()
-                date_entry.delete(0, END)
-                date_entry.insert(0, date.strftime(datetime.strptime(d, "%m-%d-%Y"), "%m-%d-%Y"))
-                d = date_entry.get()
-                print_manifest(x, d)
-            except:
-                messagebox.showinfo("Information", "Date is invalid.")
-                return
         printbtn = Button(frame, text = "Print Manifest", command = print_manifest_button)
         printbtn.grid(row = i, column = 0, padx = 5)
+        openfbtn = Button(frame, text = "Open File", command = open_file_button)
+        openfbtn.grid(row = i + 2, column = 0, padx = 5)
+
         erasebtn = Button(frame, text = "Erase Entries", command = erase_manifest)
-        erasebtn.grid(row = i + 2, column = 0, padx = 5)
+        erasebtn.grid(row = i + 7, column = 0, padx = 5)
         i += 1
 
         Label(frame, text = 'Builder').grid(row = i, column = 1)
@@ -192,7 +252,7 @@ def populate_manifest(win, manifests):
     for x in v:
         x.trace("w", not_saved)
 
-def update_manifests(new = False, m = manifests):
+def update_manifests(new = False):
     # index for looping through work order entries. 
     # example: each manifest has multiple work orders, if manifest 1 has 2 orders, and manifest 2 has 4, 
     # in order to find the 2nd order for the 2nd manifest, that would be index 4 in this case, index 4 for each workorder entry widget
@@ -206,22 +266,26 @@ def update_manifests(new = False, m = manifests):
         messagebox.showinfo("Information", "Date is invalid.")
         return
 
-    for x in range(len(m)):
-        m[x].date = date_entry.get()
-        m[x].lead = leads[x].get()
-        m[x].crew = crews[x].get()
+    if new:
+        global manifests
+        manifests = load_manifests(datetime.strftime(date.today(), "%m-%d-%Y"))
 
-        for y in range(len(m[x].workorders)):
-            m[x].workorders[y].builder = builders[index].get()
-            m[x].workorders[y].subdivision = subdivisions[index].get()
-            m[x].workorders[y].lot = lots[index].get()
-            m[x].workorders[y].windows = windowsL[index].get()
-            m[x].workorders[y].doors = doorsL[index].get()
-            m[x].workorders[y].notes = notesL[index].get()
+    for x in range(len(manifests)):
+        manifests[x].date = date_entry.get()
+        manifests[x].lead = leads[x].get()
+        manifests[x].crew = crews[x].get()
+
+        for y in range(len(manifests[x].workorders)):
+            manifests[x].workorders[y].builder = builders[index].get()
+            manifests[x].workorders[y].subdivision = subdivisions[index].get()
+            manifests[x].workorders[y].lot = lots[index].get()
+            manifests[x].workorders[y].windows = windowsL[index].get()
+            manifests[x].workorders[y].doors = doorsL[index].get()
+            manifests[x].workorders[y].notes = notesL[index].get()
             index += 1
         
-        if m[x].lead:
-            create_workbook(m[x])
+        if manifests[x].lead:
+            create_workbook(manifests[x])
 
     if new:
         messagebox.showinfo("Information", "New manifests and spreadsheets have been created for: " + d)
@@ -231,21 +295,6 @@ def update_manifests(new = False, m = manifests):
     
     global saved
     saved = True
-
-def fake_print():
-    global saved
-    if not saved:
-        if not messagebox.askyesno("Information", "Changes not saved.\n\nPrint anyway?"):
-            return
-    try:
-        d = date_entry.get()
-        date_entry.delete(0, END)
-        date_entry.insert(0, date.strftime(datetime.strptime(d, "%m-%d-%Y"), "%m-%d-%Y"))
-    except:
-        messagebox.showinfo("Information", "Date is invalid.")
-        return
-    
-    print("printing hehe", date_entry.get())
 
 def print_manifests_button():
     global saved
@@ -263,12 +312,13 @@ def print_manifests_button():
     print_manifests(date_entry.get())
 
 def add_manifest():
-    m = insert_new_manifest(date_entry.get(), manifests)
+    global manifests
+    manifests = insert_new_manifest(date_entry.get(), manifests)
     main_frame.destroy()
-    initialize(root, m)
+    initialize(root)
 
 #initializes the main frame which houses all manifest entries and scroll bar
-def initialize(root, manifests):
+def initialize(root):
     global main_frame
     main_frame = Frame(root)
     main_frame.pack(fill = BOTH, expand = 1)
@@ -282,7 +332,7 @@ def initialize(root, manifests):
     second_frame = Frame(my_canvas, padx = 20)
     my_canvas.create_window((0,0), window = second_frame, anchor = "nw")
 
-    populate_manifest(second_frame, manifests)
+    populate_manifest(second_frame)
 
 #buttons
 btn = Button(header, text="Load Manifests", padx = 20, command=retrieve_manifests)
@@ -304,7 +354,7 @@ menu_frame.pack(side = LEFT, fill = BOTH)
 btn4 = Button(menu_frame, text="Add New Manifest", padx = 20, command=add_manifest)
 btn4.pack(side = LEFT)
 
-initialize(root, manifests)
+initialize(root)
 
 def ask_quit():
     if saved:
